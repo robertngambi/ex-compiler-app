@@ -1,0 +1,6 @@
+{
+  "name": "Ex-Compiler - Multi-Platform App Compiler",
+  "description": "Multi-platform compiler that analyzes hosted URLs or project code, auto-fixes errors, installs dependencies, and compiles downloadable artifacts for Android, iOS, Windows, macOS, and Linux.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
