@@ -100,17 +100,17 @@ export const LiveConsole: React.FC<LiveConsoleProps> = ({
   };
 
   return (
-    <div className="border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 rounded-2xl overflow-hidden shadow-xl flex flex-col h-[520px]">
+    <div className="border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 rounded-xl sm:rounded-2xl overflow-hidden shadow-md flex flex-col h-[380px] sm:h-[460px]">
       
       {/* Console Top Toolbar */}
-      <div className="px-4 py-3 bg-slate-50 dark:bg-slate-900/90 border-b border-slate-200 dark:border-slate-800 flex flex-wrap items-center justify-between gap-3">
+      <div className="px-3 sm:px-4 py-2 sm:py-2.5 bg-slate-50 dark:bg-slate-900/90 border-b border-slate-200 dark:border-slate-800 flex flex-wrap items-center justify-between gap-2 sm:gap-3">
         <div className="flex items-center gap-2">
           <div className="flex items-center gap-1.5">
             <span className="w-2.5 h-2.5 rounded-full bg-rose-500/80" />
             <span className="w-2.5 h-2.5 rounded-full bg-amber-500/80" />
             <span className="w-2.5 h-2.5 rounded-full bg-emerald-500/80" />
           </div>
-          <div className="h-4 w-px bg-slate-300 dark:bg-slate-800 mx-1" />
+          <div className="h-3.5 w-px bg-slate-300 dark:bg-slate-800 mx-1" />
           <div className="flex items-center gap-1.5">
             <Terminal className="w-4 h-4 text-blue-600 dark:text-blue-400" />
             <span className="text-xs font-mono font-bold text-slate-800 dark:text-slate-200">
@@ -118,9 +118,9 @@ export const LiveConsole: React.FC<LiveConsoleProps> = ({
             </span>
           </div>
           {isBuilding && (
-            <span className="inline-flex items-center gap-1 text-[11px] font-mono text-blue-600 dark:text-blue-400 px-2 py-0.5 rounded bg-blue-500/10 border border-blue-500/20 ml-2 font-semibold">
+            <span className="inline-flex items-center gap-1 text-[10px] sm:text-[11px] font-mono text-blue-600 dark:text-blue-400 px-1.5 sm:px-2 py-0.5 rounded bg-blue-500/10 border border-blue-500/20 font-semibold">
               <RefreshCw className="w-3 h-3 animate-spin" />
-              Streaming logs...
+              <span className="hidden xs:inline">Streaming</span>
             </span>
           )}
         </div>

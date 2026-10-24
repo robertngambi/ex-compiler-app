@@ -56,23 +56,23 @@ export const DeveloperModal: React.FC<DeveloperModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className={`w-full max-w-xl border rounded-2xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col ${
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4">
+      <div className={`w-full max-w-xl border rounded-xl sm:rounded-2xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col ${
         isLight 
           ? 'bg-white border-slate-200 text-slate-900 shadow-slate-300/40' 
           : 'bg-slate-900 border-slate-800 text-slate-100'
       }`}>
         
         {/* Header */}
-        <div className={`px-6 py-4 border-b flex items-center justify-between ${
+        <div className={`px-4 sm:px-6 py-3 sm:py-4 border-b flex items-center justify-between ${
           isLight ? 'bg-slate-50 border-slate-200' : 'bg-slate-900/90 border-slate-800'
         }`}>
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-blue-600/15 border border-blue-500/30 flex items-center justify-center">
-              <Terminal className="w-5 h-5 text-blue-500 dark:text-blue-400" />
+          <div className="flex items-center gap-2.5 sm:gap-3">
+            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl bg-blue-600/15 border border-blue-500/30 flex items-center justify-center shrink-0">
+              <Terminal className="w-4 h-4 sm:w-5 sm:h-5 text-blue-500 dark:text-blue-400" />
             </div>
             <div>
-              <h3 className="text-base font-bold tracking-tight">
+              <h3 className="text-sm sm:text-base font-bold tracking-tight">
                 Developer Configuration & Keys
               </h3>
             </div>
@@ -83,12 +83,12 @@ export const DeveloperModal: React.FC<DeveloperModalProps> = ({
               isLight ? 'text-slate-400 hover:text-slate-800 hover:bg-slate-200' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'
             }`}
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4" />
           </button>
         </div>
 
         {/* Scrollable Form Body */}
-        <form onSubmit={handleSave} className="flex-1 overflow-y-auto p-6 space-y-5">
+        <form onSubmit={handleSave} className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 sm:space-y-5">
           
           {/* Android Keystore */}
           <div className={`space-y-2 p-4 rounded-xl border ${

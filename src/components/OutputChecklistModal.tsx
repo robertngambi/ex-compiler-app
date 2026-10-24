@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X, Check, Smartphone, Monitor } from 'lucide-react';
-import { PlatformConfig, PlatformId } from '../types';
+import { PlatformId } from '../types';
 import { PLATFORM_CONFIGS } from '../services/platformData';
 
 interface OutputChecklistModalProps {
@@ -54,13 +54,13 @@ export const OutputChecklistModal: React.FC<OutputChecklistModalProps> = ({
   const title = category === 'mobile' ? 'Mobile Outputs' : 'Desktop Outputs';
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="w-full max-w-md bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl overflow-hidden flex flex-col animate-in fade-in zoom-in-95 duration-150">
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4">
+      <div className="w-full max-w-md bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl sm:rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] animate-in fade-in zoom-in-95 duration-150">
         
         {/* Header */}
-        <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50 dark:bg-slate-900/90">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full bg-blue-600/15 border border-blue-500/30 flex items-center justify-center">
+        <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50 dark:bg-slate-900/90">
+          <div className="flex items-center gap-2.5 sm:gap-3">
+            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-blue-600/15 border border-blue-500/30 flex items-center justify-center shrink-0">
               {category === 'mobile' ? (
                 <Smartphone className="w-4 h-4 text-blue-600 dark:text-blue-400" />
               ) : (
@@ -68,7 +68,7 @@ export const OutputChecklistModal: React.FC<OutputChecklistModalProps> = ({
               )}
             </div>
             <div>
-              <h3 className="text-base font-bold text-slate-900 dark:text-white tracking-tight">
+              <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white tracking-tight">
                 {title}
               </h3>
             </div>
@@ -83,13 +83,13 @@ export const OutputChecklistModal: React.FC<OutputChecklistModalProps> = ({
         </div>
 
         {/* Quick actions */}
-        <div className="px-6 pt-3 flex items-center justify-between text-xs text-slate-600 dark:text-slate-400">
-          <span className="font-medium">{tempSelected.length} of {platformIds.length} selected</span>
+        <div className="px-4 sm:px-6 pt-2.5 sm:pt-3 flex items-center justify-between text-xs text-slate-600 dark:text-slate-400">
+          <span className="font-medium text-[11px] sm:text-xs">{tempSelected.length} of {platformIds.length} selected</span>
           <div className="flex items-center gap-2">
             <button
               type="button"
               onClick={handleSelectAll}
-              className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-bold cursor-pointer"
+              className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-bold cursor-pointer text-xs"
             >
               Select All
             </button>
@@ -97,7 +97,7 @@ export const OutputChecklistModal: React.FC<OutputChecklistModalProps> = ({
             <button
               type="button"
               onClick={handleClear}
-              className="text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 font-medium cursor-pointer"
+              className="text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 font-medium cursor-pointer text-xs"
             >
               Clear
             </button>
@@ -105,7 +105,7 @@ export const OutputChecklistModal: React.FC<OutputChecklistModalProps> = ({
         </div>
 
         {/* Checklist: 100% rounded buttons, NO outline borders, bold text when active, 100% rounded blue check badge */}
-        <div className="p-6 space-y-3 max-h-80 overflow-y-auto">
+        <div className="p-4 sm:p-6 space-y-2.5 max-h-[55vh] sm:max-h-80 overflow-y-auto">
           {platformIds.map((id) => {
             const config = PLATFORM_CONFIGS[id];
             const isChecked = tempSelected.includes(id);
@@ -115,39 +115,39 @@ export const OutputChecklistModal: React.FC<OutputChecklistModalProps> = ({
                 key={id}
                 type="button"
                 onClick={() => toggleItem(id)}
-                className={`w-full flex items-center justify-between px-5 py-3.5 rounded-full border-0 transition-all cursor-pointer select-none text-left ${
+                className={`w-full flex items-center justify-between px-4 sm:px-5 py-2.5 sm:py-3 rounded-full border-0 transition-all cursor-pointer select-none text-left ${
                   isChecked
-                    ? 'bg-blue-600/15 dark:bg-blue-600/20 text-slate-900 dark:text-white shadow-sm ring-0'
+                    ? 'bg-blue-600/15 dark:bg-blue-600/20 text-slate-900 dark:text-white shadow-xs ring-0'
                     : 'bg-slate-100 dark:bg-slate-950/60 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-900 hover:text-slate-800 dark:hover:text-slate-200'
                 }`}
               >
-                <div className="flex items-center gap-3.5">
+                <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
                   {/* 100% rounded Blue Checkbox Badge */}
                   <div
-                    className={`w-6 h-6 rounded-full flex items-center justify-center transition-all ${
+                    className={`w-5 h-5 sm:w-6 sm:h-6 rounded-full flex items-center justify-center transition-all shrink-0 ${
                       isChecked
-                        ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30'
+                        ? 'bg-blue-600 text-white shadow-xs'
                         : 'border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-900'
                     }`}
                   >
-                    {isChecked && <Check className="w-3.5 h-3.5 stroke-[3]" />}
+                    {isChecked && <Check className="w-3 h-3 sm:w-3.5 sm:h-3.5 stroke-[3]" />}
                   </div>
 
-                  <div>
-                    <span className={`text-xs block ${
+                  <div className="min-w-0">
+                    <span className={`text-xs block truncate ${
                       isChecked 
                         ? 'font-bold text-slate-900 dark:text-white' 
                         : 'font-normal text-slate-700 dark:text-slate-300'
                     }`}>
                       {config?.label || id}
                     </span>
-                    <span className="text-[10px] text-slate-500 dark:text-slate-400 font-mono">
+                    <span className="text-[10px] text-slate-500 dark:text-slate-400 font-mono block truncate">
                       {config?.platformName}
                     </span>
                   </div>
                 </div>
 
-                <span className="text-xs font-mono font-bold px-3 py-1 rounded-full bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 shadow-xs">
+                <span className="text-[11px] font-mono font-bold px-2.5 py-0.5 rounded-full bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 shadow-2xs shrink-0 ml-2">
                   {config?.extension}
                 </span>
               </button>
@@ -156,11 +156,11 @@ export const OutputChecklistModal: React.FC<OutputChecklistModalProps> = ({
         </div>
 
         {/* Modal Bottom: Cancel on left, Ok on right with 100% rounded buttons */}
-        <div className="px-6 py-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 flex items-center justify-between">
+        <div className="px-4 sm:px-6 py-3 sm:py-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 flex items-center justify-between">
           <button
             type="button"
             onClick={onClose}
-            className="px-5 py-2 text-xs font-semibold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white bg-slate-200 dark:bg-slate-900 hover:bg-slate-300 dark:hover:bg-slate-800 rounded-full transition-colors cursor-pointer"
+            className="px-4 sm:px-5 py-2 text-xs font-semibold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white bg-slate-200 dark:bg-slate-900 hover:bg-slate-300 dark:hover:bg-slate-800 rounded-full transition-colors cursor-pointer"
           >
             Cancel
           </button>
@@ -168,7 +168,7 @@ export const OutputChecklistModal: React.FC<OutputChecklistModalProps> = ({
           <button
             type="button"
             onClick={handleOk}
-            className="px-7 py-2 text-xs font-bold uppercase tracking-wider text-white bg-blue-600 hover:bg-blue-500 rounded-full transition-all shadow-md shadow-blue-600/30 cursor-pointer"
+            className="px-6 sm:px-7 py-2 text-xs font-bold uppercase tracking-wider text-white bg-blue-600 hover:bg-blue-500 rounded-full transition-all shadow-md shadow-blue-600/30 cursor-pointer"
           >
             Ok
           </button>

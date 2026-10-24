@@ -2,12 +2,18 @@
 
 @layer base {
   html {
-    font-size: 180%; /* 1.8x scaling across the entire platform */
+    font-size: 100%; /* Desirable standard 16px base font size */
     font-family: Arial, Helvetica, sans-serif;
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
   }
   
   body {
     font-family: Arial, Helvetica, sans-serif;
+    overflow-x: hidden;
+    width: 100%;
+    margin: 0;
+    padding: 0;
   }
   
   code, pre, .font-mono {
@@ -24,7 +30,7 @@
   }
 }
 
-/* Slowly shifting animated gradient for Ex-Compiler title */
+/* Slowly shifting animated gradient for Ex-Compiler title in Bahnschrift */
 @keyframes titleGradientShift {
   0% {
     background-position: 0% 50%;

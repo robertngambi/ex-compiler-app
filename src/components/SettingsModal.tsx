@@ -39,23 +39,23 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   const isLight = theme === 'light';
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className={`w-full max-w-lg border rounded-2xl shadow-2xl overflow-hidden flex flex-col ${
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4">
+      <div className={`w-full max-w-lg border rounded-xl sm:rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] ${
         isLight 
           ? 'bg-white border-slate-200 text-slate-900 shadow-slate-300/40' 
           : 'bg-slate-900 border-slate-800 text-slate-100'
       }`}>
         
         {/* Header with Key symbol */}
-        <div className={`px-6 py-4 border-b flex items-center justify-between ${
+        <div className={`px-4 sm:px-6 py-3 sm:py-4 border-b flex items-center justify-between ${
           isLight ? 'bg-slate-50 border-slate-200' : 'bg-slate-900/90 border-slate-800'
         }`}>
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-xl bg-blue-600/15 border border-blue-500/30 flex items-center justify-center">
+          <div className="flex items-center gap-2.5 sm:gap-3">
+            <div className="w-8 h-8 rounded-lg sm:rounded-xl bg-blue-600/15 border border-blue-500/30 flex items-center justify-center shrink-0">
               <KeyRound className="w-4 h-4 text-blue-500 dark:text-blue-400" />
             </div>
             <div>
-              <h3 className="text-base font-bold tracking-tight">
+              <h3 className="text-sm sm:text-base font-bold tracking-tight">
                 Settings & Environment
               </h3>
             </div>
@@ -73,48 +73,48 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
         </div>
 
         {/* Modal Body */}
-        <div className="p-6 space-y-5 max-h-[80vh] overflow-y-auto">
+        <div className="p-4 sm:p-6 space-y-4 sm:space-y-5 overflow-y-auto">
           
           {/* Appearance & Background: Dark Mode or Light Mode */}
-          <div className={`space-y-2.5 pb-4 border-b ${isLight ? 'border-slate-200' : 'border-slate-800'}`}>
+          <div className={`space-y-2 pb-3 sm:pb-4 border-b ${isLight ? 'border-slate-200' : 'border-slate-800'}`}>
             <label className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 block">
               Appearance
             </label>
-            <div className="grid grid-cols-2 gap-2.5">
+            <div className="grid grid-cols-2 gap-2 sm:gap-2.5">
               <button
                 type="button"
                 onClick={() => onThemeChange('dark')}
-                className={`flex items-center justify-center gap-2 p-2.5 rounded-xl border text-xs font-semibold transition-all cursor-pointer ${
+                className={`flex items-center justify-center gap-2 p-2 sm:p-2.5 rounded-xl border text-xs font-semibold transition-all cursor-pointer ${
                   theme === 'dark'
-                    ? 'bg-blue-600 border-blue-500 text-white shadow-sm'
+                    ? 'bg-blue-600 border-blue-500 text-white shadow-xs'
                     : isLight 
                       ? 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50' 
                       : 'bg-slate-950/60 border-slate-800 text-slate-400 hover:text-white hover:border-slate-700'
                 }`}
               >
-                <Moon className="w-4 h-4" />
+                <Moon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                 <span>Dark Mode</span>
               </button>
 
               <button
                 type="button"
                 onClick={() => onThemeChange('light')}
-                className={`flex items-center justify-center gap-2 p-2.5 rounded-xl border text-xs font-semibold transition-all cursor-pointer ${
+                className={`flex items-center justify-center gap-2 p-2 sm:p-2.5 rounded-xl border text-xs font-semibold transition-all cursor-pointer ${
                   theme === 'light'
-                    ? 'bg-blue-600 border-blue-500 text-white shadow-sm'
+                    ? 'bg-blue-600 border-blue-500 text-white shadow-xs'
                     : isLight 
                       ? 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50' 
                       : 'bg-slate-950/60 border-slate-800 text-slate-400 hover:text-white hover:border-slate-700'
                 }`}
               >
-                <Sun className="w-4 h-4" />
+                <Sun className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                 <span>Light Mode</span>
               </button>
             </div>
           </div>
 
           {/* Runners List & CI Workflow (Moved from Header) */}
-          <div className={`space-y-3 pb-4 border-b ${isLight ? 'border-slate-200' : 'border-slate-800'}`}>
+          <div className={`space-y-2.5 pb-3 sm:pb-4 border-b ${isLight ? 'border-slate-200' : 'border-slate-800'}`}>
             <div className="flex items-center justify-between">
               <label className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
                 <Server className="w-3.5 h-3.5 text-blue-500" />
@@ -127,7 +127,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   onClose();
                   onOpenWorkflow();
                 }}
-                className="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 bg-blue-500/10 hover:bg-blue-500/20 rounded-lg transition-colors cursor-pointer"
+                className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 bg-blue-500/10 hover:bg-blue-500/20 rounded-lg transition-colors cursor-pointer"
                 title="Inspect generated release.yml GitHub Actions workflow"
               >
                 <FileCode2 className="w-3.5 h-3.5" />
@@ -137,61 +137,61 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
             <div className="space-y-2">
               {/* Docker Runner */}
-              <div className={`p-3 rounded-xl border flex items-center justify-between ${
+              <div className={`p-2.5 sm:p-3 rounded-xl border flex flex-col xs:flex-row sm:flex-row items-start sm:items-center justify-between gap-2 ${
                 isLight ? 'bg-slate-50 border-slate-200' : 'bg-slate-950/60 border-slate-800'
               }`}>
-                <div className="flex items-center gap-2.5">
-                  <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
-                  <div>
-                    <span className="text-xs font-bold block text-slate-800 dark:text-slate-200">
+                <div className="flex items-center gap-2 sm:gap-2.5 min-w-0">
+                  <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+                  <div className="min-w-0">
+                    <span className="text-xs font-bold block text-slate-800 dark:text-slate-200 truncate">
                       Docker Container (Android)
                     </span>
-                    <span className="text-[11px] text-slate-500 dark:text-slate-400 font-mono">
+                    <span className="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 font-mono block truncate">
                       Ubuntu 22.04 · Android SDK 34 · OpenJDK 17
                     </span>
                   </div>
                 </div>
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                <span className="text-[9px] sm:text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 shrink-0">
                   Ready
                 </span>
               </div>
 
               {/* MacStadium Runner */}
-              <div className={`p-3 rounded-xl border flex items-center justify-between ${
+              <div className={`p-2.5 sm:p-3 rounded-xl border flex flex-col xs:flex-row sm:flex-row items-start sm:items-center justify-between gap-2 ${
                 isLight ? 'bg-slate-50 border-slate-200' : 'bg-slate-950/60 border-slate-800'
               }`}>
-                <div className="flex items-center gap-2.5">
-                  <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
-                  <div>
-                    <span className="text-xs font-bold block text-slate-800 dark:text-slate-200">
+                <div className="flex items-center gap-2 sm:gap-2.5 min-w-0">
+                  <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+                  <div className="min-w-0">
+                    <span className="text-xs font-bold block text-slate-800 dark:text-slate-200 truncate">
                       MacStadium Host (iOS)
                     </span>
-                    <span className="text-[11px] text-slate-500 dark:text-slate-400 font-mono">
+                    <span className="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 font-mono block truncate">
                       macOS Sonoma · Xcode 15.4 · Fastlane
                     </span>
                   </div>
                 </div>
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                <span className="text-[9px] sm:text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 shrink-0">
                   Ready
                 </span>
               </div>
 
               {/* GitHub Matrix Runner */}
-              <div className={`p-3 rounded-xl border flex items-center justify-between ${
+              <div className={`p-2.5 sm:p-3 rounded-xl border flex flex-col xs:flex-row sm:flex-row items-start sm:items-center justify-between gap-2 ${
                 isLight ? 'bg-slate-50 border-slate-200' : 'bg-slate-950/60 border-slate-800'
               }`}>
-                <div className="flex items-center gap-2.5">
-                  <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
-                  <div>
-                    <span className="text-xs font-bold block text-slate-800 dark:text-slate-200">
+                <div className="flex items-center gap-2 sm:gap-2.5 min-w-0">
+                  <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+                  <div className="min-w-0">
+                    <span className="text-xs font-bold block text-slate-800 dark:text-slate-200 truncate">
                       GitHub Matrix (Desktop)
                     </span>
-                    <span className="text-[11px] text-slate-500 dark:text-slate-400 font-mono">
+                    <span className="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 font-mono block truncate">
                       windows-latest · macos-14 · ubuntu-22.04
                     </span>
                   </div>
                 </div>
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                <span className="text-[9px] sm:text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 shrink-0">
                   Ready
                 </span>
               </div>

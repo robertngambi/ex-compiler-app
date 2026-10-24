@@ -39,20 +39,20 @@ export const WorkflowModal: React.FC<WorkflowModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="w-full max-w-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh]">
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4">
+      <div className="w-full max-w-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl sm:rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[88vh]">
         
         {/* Header */}
-        <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50 dark:bg-slate-900/90">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-blue-500/10 border border-blue-500/30 flex items-center justify-center">
-              <FileCode2 className="w-5 h-5 text-blue-500 dark:text-blue-400" />
+        <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50 dark:bg-slate-900/90 gap-2">
+          <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl bg-blue-500/10 border border-blue-500/30 flex items-center justify-center shrink-0">
+              <FileCode2 className="w-4 h-4 sm:w-5 sm:h-5 text-blue-500 dark:text-blue-400" />
             </div>
-            <div>
-              <h3 className="text-base font-bold text-slate-900 dark:text-white tracking-tight">
+            <div className="min-w-0">
+              <h3 className="text-xs sm:text-base font-bold text-slate-900 dark:text-white tracking-tight truncate">
                 .github/workflows/release.yml
               </h3>
-              <p className="text-xs text-slate-600 dark:text-slate-400">
+              <p className="text-[11px] sm:text-xs text-slate-600 dark:text-slate-400 truncate">
                 Generated CI matrix workflow for native multi-platform compilation
               </p>
             </div>
