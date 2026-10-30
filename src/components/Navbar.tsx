@@ -2,7 +2,8 @@ import React from 'react';
 import { 
   Hammer, 
   KeyRound, 
-  HelpCircle
+  HelpCircle,
+  History
 } from 'lucide-react';
 import { ForgeSettings } from '../types';
 
@@ -10,12 +11,16 @@ interface NavbarProps {
   settings: ForgeSettings;
   onOpenSettings: () => void;
   onOpenDocs: () => void;
+  onOpenHistory: () => void;
+  historyCount?: number;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
   settings,
   onOpenSettings,
   onOpenDocs,
+  onOpenHistory,
+  historyCount = 0,
 }) => {
   const secretsConfigured = settings.androidKeystoreUploaded || settings.appleP8Configured || settings.githubPatConfigured;
 
@@ -40,11 +45,28 @@ export const Navbar: React.FC<NavbarProps> = ({
           </div>
         </div>
 
-        {/* Right Actions: Output Formats & Docs Help (?) and Settings & Keys */}
+        {/* Right Actions: Recents, Help Docs, Settings & Keys */}
         <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+          {/* Recents / Activities Archive button */}
+          <button
+            onClick={onOpenHistory}
+            className="inline-flex items-center gap-1.5 px-2.5 sm:px-3.5 py-1.5 rounded-full text-xs font-bold text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 border border-slate-300 dark:border-slate-800 transition-colors cursor-pointer select-none"
+            title="Recents & Activities Archive"
+            aria-label="Recents & Activities Archive"
+          >
+            <History className="w-3.5 h-3.5 text-blue-500 dark:text-blue-400" />
+            <span className="hidden xs:inline sm:inline">Recents</span>
+            {historyCount > 0 && (
+              <span className="ml-0.5 px-1.5 py-0.2 rounded-full text-[10px] bg-blue-600 text-white font-mono font-bold">
+                {historyCount}
+              </span>
+            )}
+          </button>
+
+          {/* Docs & Output Guide '?' button: same border outline, background, and sizing as the key button */}
           <button
             onClick={onOpenDocs}
-            className="p-1.5 sm:p-2 text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-900 rounded-lg sm:rounded-xl border border-transparent hover:border-slate-300 dark:hover:border-slate-800 transition-colors cursor-pointer"
+            className="relative p-1.5 sm:p-2 rounded-full transition-all cursor-pointer flex items-center justify-center bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white border border-slate-300 dark:border-slate-800 hover:border-slate-400 dark:hover:border-slate-700 shadow-xs"
             title="Documentation, Permalinks & Output Formats Guide"
             aria-label="Output Guide & Documentation"
           >
@@ -54,10 +76,10 @@ export const Navbar: React.FC<NavbarProps> = ({
           {/* Signing & Settings Key button */}
           <button
             onClick={onOpenSettings}
-            className={`relative p-1.5 sm:p-2 rounded-lg sm:rounded-xl transition-all cursor-pointer flex items-center justify-center ${
+            className={`relative p-1.5 sm:p-2 rounded-full transition-all cursor-pointer flex items-center justify-center ${
               secretsConfigured 
                 ? 'bg-blue-600/15 text-blue-600 dark:text-blue-400 border border-blue-500/40 hover:bg-blue-600/25 shadow-xs' 
-                : 'bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white border border-slate-300 dark:border-slate-800 hover:border-slate-400 dark:hover:border-slate-700'
+                : 'bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white border border-slate-300 dark:border-slate-800 hover:border-slate-400 dark:hover:border-slate-700 shadow-xs'
             }`}
             title="Settings & Secrets Vault"
             aria-label="Settings & Secrets Vault"

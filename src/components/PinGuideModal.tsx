@@ -37,20 +37,53 @@ export const PinGuideModal: React.FC<PinGuideModalProps> = ({ isOpen, onClose })
         <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 sm:space-y-5 text-xs text-slate-700 dark:text-slate-300 leading-relaxed font-sans">
           
           {/* Section 1: Android Keystore PIN and Password */}
-          <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 space-y-2">
+          <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 space-y-3">
             <div className="flex items-center justify-between text-blue-600 dark:text-blue-400 font-bold">
-              <span>1. Android Keystore & PIN Password</span>
+              <span>1. Android Keystore &amp; PIN Password (Run on PC / Mac)</span>
             </div>
+            
             <p className="text-slate-600 dark:text-slate-400">
-              Generate a private release keystore protected with a secure password/PIN using standard JDK <code className="font-mono text-slate-800 dark:text-slate-200">keytool</code>:
+              Run this in your PC terminal (<strong>PowerShell / Command Prompt</strong> on Windows, or <strong>Terminal</strong> on macOS / Linux). This requires the <strong>Java JDK</strong> (which includes the <code className="font-mono text-slate-800 dark:text-slate-200">keytool</code> utility).
             </p>
+
+            {/* Check & Install JDK instructions */}
+            <div className="p-3 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-2">
+              <span className="font-bold text-slate-800 dark:text-slate-200 text-[11px] block">
+                How to install &amp; verify JDK on your PC:
+              </span>
+              <ul className="space-y-1.5 text-slate-600 dark:text-slate-400 text-[11px]">
+                <li>
+                  <strong>Step 1: Check if already installed:</strong> Open your terminal and type <code className="font-mono text-blue-600 dark:text-blue-400">java -version</code> or <code className="font-mono text-blue-600 dark:text-blue-400">keytool -help</code>. If it prints version information, you are ready!
+                </li>
+                <li>
+                  <strong>Step 2 (If not installed):</strong> Download free official OpenJDK / Eclipse Temurin from <strong className="text-slate-800 dark:text-slate-200">adoptium.net</strong> (Select JDK 17 or 21 LTS for Windows/Mac).
+                </li>
+                <li>
+                  <strong>Quick install command:</strong>
+                  <div className="mt-1 font-mono text-[10px] bg-slate-100 dark:bg-slate-950 p-2 rounded border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 space-y-1">
+                    <div>Windows (PowerShell): <code className="text-blue-600 dark:text-blue-400">winget install EclipseAdoptium.Temurin.17.jdk</code></div>
+                    <div>macOS (Terminal): <code className="text-blue-600 dark:text-blue-400">brew install openjdk@17</code></div>
+                    <div>Linux (Ubuntu/Debian): <code className="text-blue-600 dark:text-blue-400">sudo apt update &amp;&amp; sudo apt install -y openjdk-17-jdk</code></div>
+                  </div>
+                </li>
+                <li>
+                  <em>Tip:</em> If you have <strong>Android Studio</strong> installed, JDK is already on your PC at <code className="font-mono text-[10px]">C:\Program Files\Android\Android Studio\jbr\bin\keytool.exe</code>.
+                </li>
+              </ul>
+            </div>
+
+            <p className="text-slate-600 dark:text-slate-400 text-[11px]">
+              Once JDK is installed, run this single command to generate your keystore:
+            </p>
+
             <div className="p-3 rounded-lg bg-white dark:bg-slate-900 font-mono text-[11px] text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-slate-800 select-all overflow-x-auto">
               keytool -genkey -v -keystore release.keystore -alias forge-key -keyalg RSA -keysize 2048 -validity 10000
             </div>
+
             <ul className="list-disc pl-5 space-y-1 text-slate-600 dark:text-slate-400 text-[11px]">
-              <li>When prompted, set your keystore PIN / password (at least 6 characters).</li>
-              <li>Provide your organization details and set the key alias password.</li>
-              <li>In the Developer Configuration modal, attach <code className="font-mono text-slate-800 dark:text-slate-200">release.keystore</code> and enter the alias.</li>
+              <li>When prompted, type a secure password/PIN (at least 6 characters).</li>
+              <li>Fill in your first and last name / organization, then type <code className="font-mono text-blue-600 dark:text-blue-400">yes</code> to confirm.</li>
+              <li>A <code className="font-mono text-slate-800 dark:text-slate-200">release.keystore</code> file will appear in your current directory. Upload it into Ex-Compiler.</li>
             </ul>
           </div>
 

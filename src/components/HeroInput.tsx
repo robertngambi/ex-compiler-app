@@ -91,7 +91,6 @@ export const HeroInput: React.FC<HeroInputProps> = ({
             <input 
               ref={fileInputRef}
               type="file" 
-              accept=".zip,.apk,.ipa,.aab,application/zip"
               className="hidden" 
               onChange={handleFileInputChange}
             />
@@ -101,10 +100,10 @@ export const HeroInput: React.FC<HeroInputProps> = ({
             </div>
 
             <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white mb-1">
-              Drag and drop app archive or project ZIP here
+              Drag and drop app archive, project ZIP, or Python script
             </h3>
             <p className="text-xs text-slate-600 dark:text-slate-400 max-w-md mb-3 px-2">
-              Ingest Flutter, React Native, Tauri, Electron, Kotlin, or iOS project archives (.zip, .apk, .ipa, .aab)
+              Ingest Python (.py, requirements.txt), Tauri, Electron, Flutter, React Native, Kotlin, or iOS project archives (.zip, .apk, .ipa, .aab)
             </p>
 
             <div className="inline-flex items-center gap-2 px-4 py-2 text-xs font-semibold text-slate-700 dark:text-slate-200 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-750 border border-slate-300 dark:border-slate-700 rounded-full transition-colors">
@@ -173,8 +172,23 @@ export const HeroInput: React.FC<HeroInputProps> = ({
 
         </div>
       ) : (
-        /* Project Loaded Summary Card */
-        <div className="border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/80 rounded-xl sm:rounded-2xl p-4 sm:p-5 shadow-xs backdrop-blur-sm">
+        /* Project Loaded Summary Card with one-click Import File & Drag-and-drop */
+        <div 
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
+          className={`border rounded-xl sm:rounded-2xl p-4 sm:p-5 shadow-xs backdrop-blur-sm transition-all ${
+            isDragging 
+              ? 'border-blue-500 bg-blue-500/10 scale-[1.005]' 
+              : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/80'
+          }`}
+        >
+          <input 
+            ref={fileInputRef}
+            type="file" 
+            className="hidden" 
+            onChange={handleFileInputChange}
+          />
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-200 dark:border-slate-800">
             <div className="flex items-start sm:items-center gap-3 min-w-0">
               <div className="w-10 h-10 rounded-xl bg-blue-600/15 border border-blue-500/30 flex items-center justify-center shrink-0">
@@ -192,6 +206,10 @@ export const HeroInput: React.FC<HeroInputProps> = ({
                   <span className="text-[11px] font-mono px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-700 font-semibold">
                     {analysis.detectedType}
                   </span>
+                  <span className="text-[10px] font-mono font-bold bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 px-2.5 py-0.5 rounded-full flex items-center gap-1 shadow-xs">
+                    <CheckCircle2 className="w-3 h-3 text-emerald-500" />
+                    Ready to Build
+                  </span>
                 </div>
                 <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5 truncate">
                   {analysis.summary}
@@ -201,8 +219,17 @@ export const HeroInput: React.FC<HeroInputProps> = ({
 
             <div className="flex items-center gap-2 shrink-0">
               <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold text-white bg-blue-600 hover:bg-blue-500 rounded-full transition-colors cursor-pointer shadow-xs"
+              >
+                <Upload className="w-3.5 h-3.5" />
+                <span>Import / Replace File</span>
+              </button>
+              <button
+                type="button"
                 onClick={onReset}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-colors cursor-pointer"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-full transition-colors cursor-pointer"
               >
                 <X className="w-3.5 h-3.5" />
                 <span>Change Target</span>

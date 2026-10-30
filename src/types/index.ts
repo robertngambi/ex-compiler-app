@@ -66,11 +66,12 @@ export interface Artifact {
   buildLogUrl: string;
   runner: string;
   blob?: Blob;
+  customIconDataUrl?: string;
 }
 
 export interface ProjectAnalysis {
   name: string;
-  detectedType: 'android-kotlin' | 'ios-swift' | 'tauri' | 'electron' | 'react-pwa' | 'web-url' | 'generic-web';
+  detectedType: 'android-kotlin' | 'ios-swift' | 'tauri' | 'electron' | 'react-pwa' | 'web-url' | 'generic-web' | 'python';
   summary: string;
   filesFound: string[];
   missingDepsDetected: string[];
@@ -79,6 +80,8 @@ export interface ProjectAnalysis {
   sourceUrl?: string;
   packageId?: string;
   version?: string;
+  extractedIconUrl?: string;
+  uploadedAssets?: Record<string, string>;
 }
 
 export interface ForgeSettings {
@@ -100,6 +103,10 @@ export interface BuildOptions {
   installMissingDeps: boolean;
   signBuilds: boolean;
   buildProfile: BuildProfile;
+  customCredentialsEnabled?: boolean;
+  customProjectName?: string;
+  customIconName?: string;
+  customIconDataUrl?: string;
 }
 
 export interface PromptParseResult {

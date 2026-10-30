@@ -4,7 +4,7 @@ export interface SamplePreset {
   id: string;
   name: string;
   subtitle: string;
-  category: 'Android' | 'Web URL' | 'Desktop Tauri' | 'React Native';
+  category: 'Android' | 'Web URL' | 'Desktop Tauri' | 'React Native' | 'Python';
   type: ProjectAnalysis['detectedType'];
   sampleUrl?: string;
   files: Record<string, string>;
@@ -245,6 +245,63 @@ jobs:
       status: 'detected',
       attempts: 0,
       manualInstructions: "Update ExportOptions.plist with your 10-character Apple Developer Team ID and set signingStyle to automatic.",
+    },
+  },
+  {
+    id: 'python-pyside-desktop-mobile',
+    name: 'Python GUI App (PySide6 / PyInstaller)',
+    subtitle: 'main.py, requirements.txt, pyproject.toml & icon',
+    category: 'Python',
+    type: 'python',
+    description: 'Cross-platform native Python application using Qt / PySide6 and PyInstaller. Produces standalone Windows .exe with embedded .ico, macOS .dmg with Apple ICNS, Linux .AppImage, and Android APK via Kivy/Buildozer.',
+    files: {
+      'main.py': `import sys
+from PySide6.QtWidgets import QApplication, QMainWindow, QLabel, QVBoxLayout, QWidget, QPushButton
+from PySide6.QtGui import QIcon
+
+class MainWindow(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Ex-Compiler Python Studio")
+        self.resize(700, 480)
+        self.setWindowIcon(QIcon("assets/app-icon.ico"))
+
+        layout = QVBoxLayout()
+        title = QLabel("<h2>Native Python App Compiled by Ex-Compiler</h2>")
+        title.setWordWrap(True)
+        layout.addWidget(title)
+
+        status = QLabel("Compiled with standalone PyInstaller CPython runtime.")
+        layout.addWidget(status)
+
+        action_btn = QPushButton("Launch Native Subprocess")
+        layout.addWidget(action_btn)
+
+        container = QWidget()
+        container.setLayout(layout)
+        self.setCentralWidget(container)
+
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    window = MainWindow()
+    window.show()
+    sys.exit(app.exec())`,
+      'requirements.txt': `PySide6==6.7.2\npyinstaller==6.10.0\npillow==10.4.0\nbuildozer>=1.5.0\n`,
+      'pyproject.toml': `[project]
+name = "python-pyside-studio"
+version = "1.0.0"
+description = "Native Python Desktop and Mobile application"
+authors = [{ name = "Ex-Compiler Developer", email = "dev@excompiler.app" }]
+dependencies = [
+    "PySide6>=6.7.2",
+    "pillow>=10.4.0"
+]
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"`,
+      'assets/app-icon.ico': '[Auto-generated multi-res Windows ICO header: 256x256, 48x48, 32x32, 16x16]',
+      'assets/AppIcon.icns': '[Auto-generated Apple ICNS Retina 1024x1024 bundle]',
     },
   },
 ];

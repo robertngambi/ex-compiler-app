@@ -22,6 +22,7 @@ interface ResultsPanelProps {
   projectName: string;
   onDownloadAll: () => void;
   isPackagingZip: boolean;
+  onOpenHistory?: () => void;
 }
 
 export const ResultsPanel: React.FC<ResultsPanelProps> = ({
@@ -29,6 +30,7 @@ export const ResultsPanel: React.FC<ResultsPanelProps> = ({
   projectName,
   onDownloadAll,
   isPackagingZip,
+  onOpenHistory,
 }) => {
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [downloadedId, setDownloadedId] = useState<string | null>(null);
@@ -93,24 +95,37 @@ export const ResultsPanel: React.FC<ResultsPanelProps> = ({
           </p>
         </div>
 
-        {/* Download all as ZIP in Blue */}
-        <button
-          onClick={onDownloadAll}
-          disabled={isPackagingZip}
-          className="inline-flex items-center justify-center gap-2 px-6 py-3 text-xs font-bold uppercase tracking-wider text-white bg-blue-600 hover:bg-blue-500 rounded-full shadow-md shadow-blue-600/30 transition-all cursor-pointer disabled:opacity-50"
-        >
-          {isPackagingZip ? (
-            <>
-              <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              <span>Bundling ZIP...</span>
-            </>
-          ) : (
-            <>
-              <Archive className="w-4 h-4" />
-              <span>Download All as ZIP</span>
-            </>
+        {/* Action buttons: Recents Archive & Download all as ZIP in Blue */}
+        <div className="flex flex-wrap items-center gap-2.5">
+          {onOpenHistory && (
+            <button
+              onClick={onOpenHistory}
+              type="button"
+              className="inline-flex items-center justify-center gap-1.5 px-4 py-3 text-xs font-bold text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-full transition-all cursor-pointer shadow-xs"
+            >
+              <Clock className="w-3.5 h-3.5 text-blue-500" />
+              <span>Activities Archive</span>
+            </button>
           )}
-        </button>
+
+          <button
+            onClick={onDownloadAll}
+            disabled={isPackagingZip}
+            className="inline-flex items-center justify-center gap-2 px-6 py-3 text-xs font-bold uppercase tracking-wider text-white bg-blue-600 hover:bg-blue-500 rounded-full shadow-md shadow-blue-600/30 transition-all cursor-pointer disabled:opacity-50"
+          >
+            {isPackagingZip ? (
+              <>
+                <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                <span>Bundling ZIP...</span>
+              </>
+            ) : (
+              <>
+                <Archive className="w-4 h-4" />
+                <span>Download All as ZIP</span>
+              </>
+            )}
+          </button>
+        </div>
       </div>
 
       {/* Artifact Cards Grid */}
@@ -124,8 +139,12 @@ export const ResultsPanel: React.FC<ResultsPanelProps> = ({
               {/* Top metadata */}
               <div className="flex items-start justify-between gap-2 mb-3">
                 <div className="flex items-center gap-2.5">
-                  <div className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center">
-                    {getPlatformIcon(art.platform)}
+                  <div className="relative w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center overflow-hidden shrink-0">
+                    {art.customIconDataUrl ? (
+                      <img src={art.customIconDataUrl} alt="App Icon" className="w-7 h-7 object-contain" />
+                    ) : (
+                      getPlatformIcon(art.platform)
+                    )}
                   </div>
                   <div>
                     <h4 className="text-xs font-bold text-slate-900 dark:text-white leading-tight">
@@ -137,7 +156,12 @@ export const ResultsPanel: React.FC<ResultsPanelProps> = ({
                   </div>
                 </div>
 
-                <div className="flex items-center gap-1.5">
+                <div className="flex items-center gap-1.5 flex-wrap justify-end">
+                  {art.customIconDataUrl && (
+                    <span className="text-[10px] font-mono px-1.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 font-semibold">
+                      Icon Bound
+                    </span>
+                  )}
                   {art.signed && (
                     <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20 flex items-center gap-1 font-semibold">
                       <ShieldCheck className="w-3 h-3" />

@@ -6,7 +6,9 @@ import {
   Monitor, 
   Download, 
   CheckCircle2, 
-  Link2
+  Link2,
+  Code,
+  Image as ImageIcon
 } from 'lucide-react';
 
 interface DocsModalProps {
@@ -140,6 +142,70 @@ export const DocsModal: React.FC<DocsModalProps> = ({ isOpen, onClose }) => {
                 <p className="text-slate-600 dark:text-slate-400 text-[11px] leading-relaxed">
                   Self-contained universal Linux binary. Runs on Ubuntu, Debian, Fedora, Arch, and Red Hat without requiring root privileges or package manager installation.
                 </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Python Compilation Section */}
+          <div className="space-y-3 pt-2">
+            <div className="flex items-center gap-2 text-slate-900 dark:text-white font-bold text-xs uppercase tracking-wider">
+              <Code className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+              <span>Python Project Compilation & Packaging</span>
+            </div>
+
+            <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 space-y-3 text-[11px] text-slate-700 dark:text-slate-300">
+              <p className="leading-relaxed">
+                Ex-Compiler natively supports compiling Python applications (<code className="font-mono text-slate-800 dark:text-slate-200">main.py</code>, <code className="font-mono text-slate-800 dark:text-slate-200">requirements.txt</code>, <code className="font-mono text-slate-800 dark:text-slate-200">pyproject.toml</code>) into standalone desktop binaries and mobile packages:
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                <div className="p-2.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800/80">
+                  <strong className="text-slate-900 dark:text-white block mb-0.5">Desktop Python (PyInstaller / Briefcase)</strong>
+                  <span className="text-slate-600 dark:text-slate-400">Bundles CPython runtime and PySide6 / PyQt / Tkinter / Flask GUI libraries into standalone <code className="font-mono text-slate-800 dark:text-slate-200">.exe</code>, <code className="font-mono text-slate-800 dark:text-slate-200">.dmg</code>, and <code className="font-mono text-slate-800 dark:text-slate-200">.AppImage</code>.</span>
+                </div>
+                <div className="p-2.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800/80">
+                  <strong className="text-slate-900 dark:text-white block mb-0.5">Mobile Python (Kivy / Buildozer)</strong>
+                  <span className="text-slate-600 dark:text-slate-400">Compiles Python bytecodes and packages Python-for-Android bootstrap into signed Android <code className="font-mono text-slate-800 dark:text-slate-200">.apk</code> and <code className="font-mono text-slate-800 dark:text-slate-200">.aab</code>.</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Desktop Output Files Icon Management Section */}
+          <div className="space-y-3 pt-2">
+            <div className="flex items-center gap-2 text-slate-900 dark:text-white font-bold text-xs uppercase tracking-wider">
+              <ImageIcon className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+              <span>Desktop Output Icon Management & Credentials</span>
+            </div>
+
+            <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 space-y-3 text-[11px] text-slate-700 dark:text-slate-300">
+              <p className="leading-relaxed">
+                When compiling desktop outputs (<code className="font-mono text-slate-800 dark:text-slate-200">.exe</code>, <code className="font-mono text-slate-800 dark:text-slate-200">.msi</code>, <code className="font-mono text-slate-800 dark:text-slate-200">.dmg</code>, <code className="font-mono text-slate-800 dark:text-slate-200">.AppImage</code>), Ex-Compiler manages icons automatically:
+              </p>
+              <div className="space-y-2">
+                <div className="flex items-start gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5" />
+                  <div>
+                    <strong className="text-slate-900 dark:text-white">Windows PE Resource Embedding:</strong> Converts any uploaded icon (.ico, .png, .svg) into multi-resolution .ico (256x256 down to 16x16) and embeds into the executable's <code className="font-mono text-slate-800 dark:text-slate-200">RT_GROUP_ICON</code> table.
+                  </div>
+                </div>
+                <div className="flex items-start gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5" />
+                  <div>
+                    <strong className="text-slate-900 dark:text-white">macOS Apple ICNS Bundle:</strong> Generates Retina-ready <code className="font-mono text-slate-800 dark:text-slate-200">AppIcon.icns</code> in <code className="font-mono text-slate-800 dark:text-slate-200">Contents/Resources/</code>, registers <code className="font-mono text-slate-800 dark:text-slate-200">CFBundleIconFile</code>, and creates the mounted volume icon.
+                  </div>
+                </div>
+                <div className="flex items-start gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5" />
+                  <div>
+                    <strong className="text-slate-900 dark:text-white">Linux FreeDesktop Integration:</strong> Scales 512x512 PNG, installs into <code className="font-mono text-slate-800 dark:text-slate-200">/usr/share/icons/hicolor/</code>, and creates a compliant <code className="font-mono text-slate-800 dark:text-slate-200">.desktop</code> shortcut.
+                  </div>
+                </div>
+                <div className="flex items-start gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
+                  <div>
+                    <strong className="text-slate-900 dark:text-white">Important Credentials Toggle:</strong> If inactive, names and icons are automatically extracted from your source files. When active, you can provide a custom project name and upload any icon file directly via "Open files".
+                  </div>
+                </div>
               </div>
             </div>
           </div>

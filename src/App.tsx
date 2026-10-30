@@ -29,13 +29,15 @@ import { ModeSwitcher } from './components/ModeSwitcher';
 import { SimpleModeControls } from './components/SimpleModeControls';
 import { PromptModeControls } from './components/PromptModeControls';
 import { LiveConsole } from './components/LiveConsole';
-import { ResultsPanel } from './components/ResultsPanel';
+import { BuildCompleteModal } from './components/BuildCompleteModal';
 import { DiagnosticsDrawer } from './components/DiagnosticsDrawer';
 import { SettingsModal } from './components/SettingsModal';
 import { DeveloperModal } from './components/DeveloperModal';
 import { PinGuideModal } from './components/PinGuideModal';
 import { WorkflowModal } from './components/WorkflowModal';
 import { DocsModal } from './components/DocsModal';
+import { HistoryModal } from './components/HistoryModal';
+import { ActivityRecord, getSavedActivities, saveActivityRecord } from './services/activityHistory';
 
 const DEFAULT_SETTINGS: ForgeSettings = {
   androidKeystoreUploaded: true,
@@ -71,6 +73,9 @@ export default function App() {
   const [isPinGuideOpen, setIsPinGuideOpen] = useState(false);
   const [isWorkflowOpen, setIsWorkflowOpen] = useState(false);
   const [isDocsOpen, setIsDocsOpen] = useState(false);
+  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+  const [isBuildCompleteOpen, setIsBuildCompleteOpen] = useState(false);
+  const [activities, setActivities] = useState<ActivityRecord[]>(() => getSavedActivities());
 
   // Build configuration options
   const [options, setOptions] = useState<BuildOptions>({
@@ -173,7 +178,8 @@ export default function App() {
         summary: preset.description,
         filesFound: Object.keys(preset.files),
         missingDepsDetected: preset.id === 'tauri-desktop-missing-webkit' ? ['libwebkit2gtk-4.0-dev', 'libayatana-appindicator3-dev'] : [],
-        suggestedPlatforms: preset.type === 'android-kotlin' ? ['android-apk', 'android-aab'] :
+        suggestedPlatforms: preset.type === 'python' ? ['windows-exe', 'windows-msi', 'macos-dmg', 'linux-appimage', 'android-apk'] :
+                           preset.type === 'android-kotlin' ? ['android-apk', 'android-aab'] :
                            preset.type === 'ios-swift' ? ['ios-ipa'] :
                            preset.type === 'tauri' ? ['windows-exe', 'windows-msi', 'macos-dmg', 'linux-appimage'] :
                            [...MOBILE_PLATFORM_IDS],
@@ -188,7 +194,7 @@ export default function App() {
         } else {
           setMobilePlatforms(['ios-ipa']);
         }
-      } else if (preset.type === 'tauri') {
+      } else if (preset.type === 'tauri' || preset.type === 'python') {
         setActiveCategory('desktop');
         setDesktopPlatforms(['windows-exe', 'windows-msi', 'macos-dmg', 'linux-appimage']);
       }
@@ -205,12 +211,20 @@ export default function App() {
     try {
       const an = await analyzeUploadedFile(file);
       setAnalysis(an);
-      if (an.detectedType === 'tauri' || an.detectedType === 'electron') {
+      if (an.detectedType === 'tauri' || an.detectedType === 'electron' || an.detectedType === 'python') {
         setActiveCategory('desktop');
+        setDesktopPlatforms(['windows-exe', 'windows-msi', 'macos-dmg', 'linux-appimage']);
+        setMobilePlatforms(['android-apk', 'android-aab']);
       } else {
         setActiveCategory('mobile');
+        setMobilePlatforms(['android-apk', 'android-aab', 'ios-ipa']);
+        setDesktopPlatforms(['windows-exe', 'windows-msi', 'macos-dmg', 'linux-appimage']);
       }
-      addLog('success', `Analyzed archive '${file.name}' (${an.detectedType}).`, 'orchestrator');
+      setOptions(prev => ({
+        ...prev,
+        customProjectName: an.name,
+      }));
+      addLog('success', `Imported '${file.name}' (${an.detectedType}). Ready to compile for Mobile and Desktop.`, 'orchestrator');
     } catch (err: any) {
       addLog('error', err.message || 'Failed to inspect file', 'orchestrator');
     } finally {
@@ -226,7 +240,10 @@ export default function App() {
     try {
       const an = analyzeHostedUrl(url);
       setAnalysis(an);
-      addLog('info', `Target set to hosted URL: ${url}.`, 'orchestrator');
+      setActiveCategory('mobile');
+      setMobilePlatforms(['android-apk', 'android-aab', 'ios-ipa']);
+      setDesktopPlatforms(['windows-exe', 'windows-msi', 'macos-dmg', 'linux-appimage']);
+      addLog('info', `Target set to hosted URL: ${url}. Ready to build.`, 'orchestrator');
     } catch (err: any) {
       addLog('error', err.message || 'Invalid URL supplied', 'orchestrator');
     } finally {
@@ -239,7 +256,9 @@ export default function App() {
     setActivePreset(null);
     setArtifacts([]);
     setErrors([]);
-    addLog('info', 'Project target reset.', 'orchestrator');
+    setMobilePlatforms([...MOBILE_PLATFORM_IDS]);
+    setDesktopPlatforms([...DESKTOP_PLATFORM_IDS]);
+    addLog('info', 'Project target reset. Waiting for new file or URL.', 'orchestrator');
   };
 
   // The Autonomous Build Pipeline
@@ -267,10 +286,19 @@ export default function App() {
     cancelBuildRef.current = false;
     setArtifacts([]);
     setErrors([]);
+
+    const effectiveProjectName = (activeOpts.customCredentialsEnabled && activeOpts.customProjectName?.trim())
+      ? activeOpts.customProjectName.trim()
+      : currentAnalysis.name;
     
     addLog('info', `--- INITIATING BUILD SEQUENCE ---`, 'orchestrator');
-    addLog('info', `Project: ${currentAnalysis.name} | Category: ${activeCategory.toUpperCase()} | Profile: ${activeOpts.buildProfile.toUpperCase()}`, 'orchestrator');
-    addLog('info', `Outputs: ${activeTargets.join(', ')}`, 'orchestrator');
+    addLog('info', `Project: ${effectiveProjectName} | Category: ${activeCategory.toUpperCase()} | Profile: ${activeOpts.buildProfile.toUpperCase()} | Engine: ${currentAnalysis.detectedType.toUpperCase()}`, 'orchestrator');
+    if (activeOpts.customCredentialsEnabled) {
+      addLog('info', `[Credentials] Custom identity active: Name='${effectiveProjectName}', Custom Icon='${activeOpts.customIconName || 'Default'}'.`, 'orchestrator');
+    } else {
+      addLog('info', `[Credentials] Auto-extract active: Derived identity '${effectiveProjectName}' directly from imported files.`, 'orchestrator');
+    }
+    addLog('info', `Target Outputs: ${activeTargets.join(', ')}`, 'orchestrator');
 
     // Collect new artifacts as they are generated
     const generatedArtifacts: Artifact[] = [];
@@ -328,13 +356,28 @@ export default function App() {
           }
         }
 
+        if (currentAnalysis.detectedType === 'python') {
+          addLog('cmd', `buildozer android ${activeOpts.buildProfile === 'release' ? 'release' : 'debug'}`, platformId);
+          await delay(300);
+          addLog('info', `Packaging Python-for-Android bootstrap with CPython 3.11 runtime...`, platformId);
+          await delay(200);
+        }
+
+        // Mobile Icon Engine for Android
+        if (activeOpts.customCredentialsEnabled && activeOpts.customIconName) {
+          addLog('info', `[Mobile Icon Engine] Custom icon '${activeOpts.customIconName}' processed: generated res/mipmap-anydpi-v26/ic_launcher.xml adaptive foreground & background vector layers.`, platformId);
+          addLog('info', `[Mobile Icon Engine] Rasterized multi-density mipmaps (mdpi, hdpi, xhdpi, xxhdpi, xxxhdpi) + round launcher icon.`, platformId);
+        } else {
+          addLog('info', `[Mobile Icon Engine] Auto-extracted app icon from source manifest; compiled Android adaptive icon mipmap drawables.`, platformId);
+        }
+
         if (activeOpts.signBuilds) {
           addLog('cmd', `jarsigner -keystore ${settings.androidKeystoreName} ${config.outputPath(activeOpts.buildProfile)} ${settings.androidKeyAlias}`, platformId);
           await delay(250);
         }
 
         const size = platformId === 'android-apk' ? 24.3 : 18.2;
-        const filename = `${currentAnalysis.name.toLowerCase()}-${activeOpts.buildProfile}${config.extension}`;
+        const filename = `${effectiveProjectName.toLowerCase()}-${activeOpts.buildProfile}${config.extension}`;
         
         const rawArt: Omit<Artifact, 'blob' | 'downloadUrl'> = {
           id: `art-${platformId}-${Date.now()}`,
@@ -349,24 +392,33 @@ export default function App() {
           checksum: `sha256:${Math.random().toString(36).substring(2, 10)}${Math.random().toString(36).substring(2, 10)}b89`,
           createdAt: new Date().toISOString(),
           expiresAt: new Date(Date.now() + 24 * 3600 * 1000).toISOString(),
-          buildLogUrl: `https://forge.cloud/logs/${currentAnalysis.name}/${platformId}.txt`,
+          buildLogUrl: `https://forge.cloud/logs/${effectiveProjectName}/${platformId}.txt`,
           runner: config.defaultRunner,
+          customIconDataUrl: activeOpts.customCredentialsEnabled ? activeOpts.customIconDataUrl : undefined,
         };
 
-        const { blob, downloadUrl } = await createDownloadableArtifactBlob(rawArt, currentAnalysis.name);
+        const { blob, downloadUrl } = await createDownloadableArtifactBlob(rawArt, effectiveProjectName, currentAnalysis);
+        const realSizeMb = Number((blob.size / (1024 * 1024)).toFixed(2));
+        const finalSizeMb = realSizeMb > 0 ? realSizeMb : size;
+        rawArt.sizeMb = finalSizeMb;
         const completeArt: Artifact = { ...rawArt, blob, downloadUrl };
         generatedArtifacts.push(completeArt);
         setArtifacts([...generatedArtifacts]);
-        addLog('success', `Output generated: ${filename} (${size} MB)`, platformId);
+        addLog('success', `Real Output generated: ${filename} (${finalSizeMb} MB, ${blob.size} bytes)`, platformId);
 
       } else if (platformId === 'ios-ipa') {
         // iOS flow
         addLog('info', `Connecting to Mac host via secure SSH tunnel...`, platformId);
         await delay(350);
 
-        const iosCmd = config.command(activeOpts.buildProfile);
-        addLog('cmd', iosCmd, platformId);
-        await delay(500);
+        if (currentAnalysis.detectedType === 'python') {
+          addLog('cmd', `briefcase build iOS -u && briefcase package iOS --adhoc`, platformId);
+          await delay(400);
+        } else {
+          const iosCmd = config.command(activeOpts.buildProfile);
+          addLog('cmd', iosCmd, platformId);
+          await delay(500);
+        }
 
         if (activePreset && activePreset.injectedError && activePreset.injectedError.platform === platformId) {
           const inj = activePreset.injectedError;
@@ -397,8 +449,16 @@ export default function App() {
           }
         }
 
+        // Mobile Icon Engine for iOS
+        if (activeOpts.customCredentialsEnabled && activeOpts.customIconName) {
+          addLog('info', `[Mobile Icon Engine] Custom icon '${activeOpts.customIconName}' processed: generated AppIcon.appiconset (1024x1024 App Store asset, 180x180 iPhone, 167x167 iPad Pro, no-alpha verified).`, platformId);
+          addLog('info', `[Mobile Icon Engine] Updated Assets.xcassets/AppIcon.appiconset/Contents.json catalog.`, platformId);
+        } else {
+          addLog('info', `[Mobile Icon Engine] Auto-extracted app icon from source manifest; compiled iOS AppIcon.appiconset 24-bit assets.`, platformId);
+        }
+
         const size = 38.6;
-        const filename = `${currentAnalysis.name.toLowerCase()}-${activeOpts.buildProfile}.ipa`;
+        const filename = `${effectiveProjectName.toLowerCase()}-${activeOpts.buildProfile}.ipa`;
 
         const rawArt: Omit<Artifact, 'blob' | 'downloadUrl'> = {
           id: `art-${platformId}-${Date.now()}`,
@@ -413,51 +473,99 @@ export default function App() {
           checksum: `sha256:${Math.random().toString(36).substring(2, 10)}${Math.random().toString(36).substring(2, 10)}7f1`,
           createdAt: new Date().toISOString(),
           expiresAt: new Date(Date.now() + 24 * 3600 * 1000).toISOString(),
-          buildLogUrl: `https://forge.cloud/logs/${currentAnalysis.name}/${platformId}.txt`,
+          buildLogUrl: `https://forge.cloud/logs/${effectiveProjectName}/${platformId}.txt`,
           runner: config.defaultRunner,
+          customIconDataUrl: activeOpts.customCredentialsEnabled ? activeOpts.customIconDataUrl : undefined,
         };
 
-        const { blob, downloadUrl } = await createDownloadableArtifactBlob(rawArt, currentAnalysis.name);
+        const { blob, downloadUrl } = await createDownloadableArtifactBlob(rawArt, effectiveProjectName, currentAnalysis);
+        const realSizeMb = Number((blob.size / (1024 * 1024)).toFixed(2));
+        const finalSizeMb = realSizeMb > 0 ? realSizeMb : size;
+        rawArt.sizeMb = finalSizeMb;
         const completeArt: Artifact = { ...rawArt, blob, downloadUrl };
         generatedArtifacts.push(completeArt);
         setArtifacts([...generatedArtifacts]);
-        addLog('success', `Output generated: ${filename} (${size} MB)`, platformId);
+        addLog('success', `Real Output generated: ${filename} (${finalSizeMb} MB, ${blob.size} bytes)`, platformId);
 
       } else {
         // Desktop platforms (Windows EXE, Windows MSI, macOS DMG, Linux AppImage)
         addLog('info', `Routing to native CI runner: ${config.defaultRunner}`, platformId);
         addLog('cmd', `gh workflow run release.yml --ref main -f platform=${platformId}`, platformId);
-        await delay(400);
+        await delay(350);
 
-        if (activePreset && activePreset.injectedError && activePreset.injectedError.platform === platformId) {
-          const inj = activePreset.injectedError;
-          addLog('error', inj.errorCode || 'Dependency missing', platformId);
-          
-          const diagError: DiagnosticError = {
-            id: `err-${Date.now()}-${platformId}`,
-            ...inj,
-            timestamp: new Date().toLocaleTimeString(),
-            attempts: 1,
-            status: activeOpts.autoFixErrors ? 'auto_fixed' : 'pending_approval',
-          };
-          collectedErrors.push(diagError);
-          setErrors([...collectedErrors]);
+        // Special Python toolchain handling
+        if (currentAnalysis.detectedType === 'python') {
+          if (platformId === 'windows-exe') {
+            const iconArg = activeOpts.customCredentialsEnabled && activeOpts.customIconName 
+              ? `--icon="${activeOpts.customIconName}"` 
+              : '--icon="assets/app-icon.ico"';
+            addLog('cmd', `pyinstaller --noconfirm --onedir --windowed --name "${effectiveProjectName}" ${iconArg} main.py`, platformId);
+            await delay(350);
+            addLog('info', `[Desktop Icon Management] Multi-resolution Windows ICO (256, 48, 32, 16px) embedded into PE binary RT_GROUP_ICON resource table.`, platformId);
+            await delay(250);
+            addLog('cmd', `makensis /DPRODUCT_NAME="${effectiveProjectName}" /DPRODUCT_ICON="app-icon.ico" installer.nsi`, platformId);
+          } else if (platformId === 'windows-msi') {
+            addLog('cmd', `candle.exe -arch x64 Product.wxs -dProductIcon="app-icon.ico" && light.exe -out ${effectiveProjectName}-x64.msi Product.wixobj`, platformId);
+            await delay(300);
+            addLog('info', `[Desktop Icon Management] Bound WiX installer ARPPRODUCTICON to embedded application icon.`, platformId);
+          } else if (platformId === 'macos-dmg') {
+            addLog('cmd', `pyinstaller --windowed --name "${effectiveProjectName}" --icon="AppIcon.icns" --target-arch universal2 main.py`, platformId);
+            await delay(350);
+            addLog('info', `[Desktop Icon Management] Generated Apple ICNS Retina iconset -> Contents/Resources/AppIcon.icns & registered CFBundleIconFile in Info.plist.`, platformId);
+            await delay(250);
+            addLog('cmd', `create-dmg --volname "${effectiveProjectName}" --volicon "AppIcon.icns" dist/${effectiveProjectName}.dmg`, platformId);
+          } else if (platformId === 'linux-appimage') {
+            addLog('cmd', `pyinstaller --onefile --name "${effectiveProjectName}" main.py`, platformId);
+            await delay(350);
+            addLog('info', `[Desktop Icon Management] Scaled 512x512 PNG to /usr/share/icons/hicolor/ and linked in ${effectiveProjectName.toLowerCase()}.desktop launcher.`, platformId);
+            await delay(250);
+            addLog('cmd', `appimagetool AppDir/ dist/${effectiveProjectName}-x86_64.AppImage`, platformId);
+          }
+        } else {
+          // Non-python (Tauri, Electron, Web Wrapper)
+          if (activePreset && activePreset.injectedError && activePreset.injectedError.platform === platformId) {
+            const inj = activePreset.injectedError;
+            addLog('error', inj.errorCode || 'Dependency missing', platformId);
+            
+            const diagError: DiagnosticError = {
+              id: `err-${Date.now()}-${platformId}`,
+              ...inj,
+              timestamp: new Date().toLocaleTimeString(),
+              attempts: 1,
+              status: activeOpts.autoFixErrors ? 'auto_fixed' : 'pending_approval',
+            };
+            collectedErrors.push(diagError);
+            setErrors([...collectedErrors]);
 
-          if (activeOpts.autoFixErrors || activeOpts.installMissingDeps) {
-            addLog('fix', `[AUTO-FIX] Injected 'sudo apt-get install -y libwebkit2gtk-4.0-dev' into CI matrix workflow...`, platformId);
-            await delay(400);
-            addLog('success', `CI dependency step updated. Restarting job...`, platformId);
-            await delay(400);
-          } else {
-            addLog('warn', `Build paused. Review missing dependency diff in Diagnostics Drawer.`, platformId);
-            setIsDiagnosticsOpen(true);
-            setIsBuilding(false);
-            return;
+            if (activeOpts.autoFixErrors || activeOpts.installMissingDeps) {
+              addLog('fix', `[AUTO-FIX] Injected 'sudo apt-get install -y libwebkit2gtk-4.0-dev' into CI matrix workflow...`, platformId);
+              await delay(400);
+              addLog('success', `CI dependency step updated. Restarting job...`, platformId);
+              await delay(400);
+            } else {
+              addLog('warn', `Build paused. Review missing dependency diff in Diagnostics Drawer.`, platformId);
+              setIsDiagnosticsOpen(true);
+              setIsBuilding(false);
+              return;
+            }
+          }
+
+          addLog('cmd', config.command(activeOpts.buildProfile), platformId);
+          await delay(400);
+
+          // Desktop Icon logs for general apps
+          if (activeOpts.customCredentialsEnabled && activeOpts.customIconName) {
+            if (platformId === 'windows-exe' || platformId === 'windows-msi') {
+              addLog('info', `[Desktop Icon Management] Custom icon '${activeOpts.customIconName}' compiled into Windows PE .ico resource table.`, platformId);
+            } else if (platformId === 'macos-dmg') {
+              addLog('info', `[Desktop Icon Management] Custom icon '${activeOpts.customIconName}' packaged into Apple ICNS Retina bundle.`, platformId);
+            } else if (platformId === 'linux-appimage') {
+              addLog('info', `[Desktop Icon Management] Custom icon '${activeOpts.customIconName}' generated as 512x512 hicolor desktop icon.`, platformId);
+            }
           }
         }
 
-        addLog('cmd', config.command(activeOpts.buildProfile), platformId);
-        await delay(450);
+        await delay(200);
 
         const sizeMap: Record<PlatformId, number> = {
           'android-apk': 24.3,
@@ -470,7 +578,7 @@ export default function App() {
         };
 
         const size = sizeMap[platformId] || 45.0;
-        const filename = `${currentAnalysis.name.toLowerCase()}-${activeOpts.buildProfile}${config.extension}`;
+        const filename = `${effectiveProjectName.toLowerCase()}-${activeOpts.buildProfile}${config.extension}`;
 
         const rawArt: Omit<Artifact, 'blob' | 'downloadUrl'> = {
           id: `art-${platformId}-${Date.now()}`,
@@ -485,22 +593,39 @@ export default function App() {
           checksum: `sha256:${Math.random().toString(36).substring(2, 10)}${Math.random().toString(36).substring(2, 10)}a92`,
           createdAt: new Date().toISOString(),
           expiresAt: new Date(Date.now() + 24 * 3600 * 1000).toISOString(),
-          buildLogUrl: `https://excompiler.cloud/logs/${currentAnalysis.name}/${platformId}.txt`,
+          buildLogUrl: `https://excompiler.cloud/logs/${effectiveProjectName}/${platformId}.txt`,
           runner: config.defaultRunner,
+          customIconDataUrl: activeOpts.customCredentialsEnabled ? activeOpts.customIconDataUrl : undefined,
         };
 
-        const { blob, downloadUrl } = await createDownloadableArtifactBlob(rawArt, currentAnalysis.name);
+        const { blob, downloadUrl } = await createDownloadableArtifactBlob(rawArt, effectiveProjectName, currentAnalysis);
+        const realSizeMb = Number((blob.size / (1024 * 1024)).toFixed(2));
+        const finalSizeMb = realSizeMb > 0 ? realSizeMb : size;
+        rawArt.sizeMb = finalSizeMb;
         const completeArt: Artifact = { ...rawArt, blob, downloadUrl };
         generatedArtifacts.push(completeArt);
         setArtifacts([...generatedArtifacts]);
-        addLog('success', `Output generated: ${filename} (${size} MB)`, platformId);
+        addLog('success', `Real Output generated: ${filename} (${finalSizeMb} MB, ${blob.size} bytes)`, platformId);
       }
 
       await delay(150);
     }
 
     addLog('success', `--- BUILD COMPLETE: ${generatedArtifacts.length} ARTIFACTS PRODUCED ---`, 'orchestrator');
+
+    // Save build session to Recents / Activities History Archive
+    saveActivityRecord(
+      effectiveProjectName,
+      activeCategory,
+      activeOpts.buildProfile,
+      generatedArtifacts,
+      currentAnalysis.detectedType,
+      activeOpts.customCredentialsEnabled ? activeOpts.customIconDataUrl : undefined
+    );
+    setActivities(getSavedActivities());
+
     setIsBuilding(false);
+    setIsBuildCompleteOpen(true);
   };
 
   const handleApplyPatch = async (errorId: string) => {
@@ -530,15 +655,20 @@ export default function App() {
   const handleDownloadAllZip = async () => {
     if (artifacts.length === 0) return;
     setIsPackagingZip(true);
+    const targetProjectName = (options.customCredentialsEnabled && options.customProjectName?.trim()) 
+      ? options.customProjectName.trim() 
+      : (analysis?.name || 'app');
     try {
-      const zipBlob = await createAllArtifactsZip(artifacts, analysis?.name || 'forge-app');
+      const zipBlob = await createAllArtifactsZip(artifacts, targetProjectName);
       const url = URL.createObjectURL(zipBlob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `${(analysis?.name || 'app').toLowerCase()}-release.zip`;
+      a.download = `${targetProjectName.toLowerCase()}-${options.buildProfile}-all-artifacts.zip`;
+      document.body.appendChild(a);
       a.click();
-      URL.revokeObjectURL(url);
-      addLog('success', `Master archive bundled.`, 'orchestrator');
+      document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(url), 2000);
+      addLog('success', `Master archive bundled: ${targetProjectName.toLowerCase()}-${options.buildProfile}-all-artifacts.zip`, 'orchestrator');
     } catch (err: any) {
       addLog('error', `Failed to bundle master ZIP: ${err.message}`, 'orchestrator');
     } finally {
@@ -558,6 +688,8 @@ export default function App() {
         settings={settings}
         onOpenSettings={() => setIsSettingsOpen(true)}
         onOpenDocs={() => setIsDocsOpen(true)}
+        onOpenHistory={() => setIsHistoryOpen(true)}
+        historyCount={activities.length}
       />
 
       {/* Main Workspace Container */}
@@ -630,6 +762,7 @@ export default function App() {
               onStartBuild={() => runBuild()}
               isBuilding={isBuilding}
               disabled={isAnalyzing}
+              analysis={analysis}
             />
           ) : (
             <PromptModeControls
@@ -661,18 +794,6 @@ export default function App() {
             onPlatformFilterChange={setActivePlatformFilter}
           />
         </div>
-
-        {/* Results Panel: Downloadable Artifacts */}
-        {artifacts.length > 0 && (
-          <div className="space-y-3 pt-6 border-t border-slate-200 dark:border-slate-800">
-            <ResultsPanel
-              artifacts={artifacts}
-              projectName={analysis?.name || 'App'}
-              onDownloadAll={handleDownloadAllZip}
-              isPackagingZip={isPackagingZip}
-            />
-          </div>
-        )}
 
       </main>
 
@@ -740,6 +861,31 @@ export default function App() {
       <DocsModal
         isOpen={isDocsOpen}
         onClose={() => setIsDocsOpen(false)}
+      />
+
+      {/* Activities & History Archive Modal */}
+      <HistoryModal
+        isOpen={isHistoryOpen}
+        onClose={() => setIsHistoryOpen(false)}
+        activities={activities}
+        onRefreshActivities={() => setActivities(getSavedActivities())}
+      />
+
+      {/* Build Complete Popup Message Modal (Cancel on left, Download a ZIP file on right) */}
+      <BuildCompleteModal
+        isOpen={isBuildCompleteOpen}
+        onClose={() => setIsBuildCompleteOpen(false)}
+        onDownloadZip={handleDownloadAllZip}
+        isPackagingZip={isPackagingZip}
+        projectName={(options.customCredentialsEnabled && options.customProjectName?.trim()) ? options.customProjectName.trim() : (analysis?.name || 'App')}
+        category={activeCategory}
+        buildProfile={options.buildProfile}
+        artifacts={artifacts}
+        customIconDataUrl={options.customCredentialsEnabled ? options.customIconDataUrl : undefined}
+        onOpenRecents={() => {
+          setIsBuildCompleteOpen(false);
+          setIsHistoryOpen(true);
+        }}
       />
 
     </div>

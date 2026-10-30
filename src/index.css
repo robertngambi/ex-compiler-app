@@ -46,11 +46,11 @@
 .ex-compiler-title {
   font-family: 'Bahnschrift', 'DIN Alternate', Arial, sans-serif;
   font-weight: 700;
-  background: linear-gradient(120deg, #2563eb, #8b5cf6, #06b6d4, #10b981, #3b82f6);
-  background-size: 300% 300%;
+  background: linear-gradient(135deg, #2563eb, #06b6d4, #10b981, #84cc16, #eab308, #f97316, #ef4444, #8b5cf6, #2563eb);
+  background-size: 400% 400%;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  animation: titleGradientShift 9s ease infinite;
+  animation: titleGradientShift 12s ease infinite;
   display: inline-block;
 }
 
